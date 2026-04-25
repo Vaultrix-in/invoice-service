@@ -1,0 +1,13 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    uses: Vaultrix-in/Vaultrix-CI/.github/workflows/parent-ci.yaml@main
+    with:
+      image_name: invoice-service
+    secrets:
+      PAT_TOKEN: $\{{ secrets.GITHUB_TOKEN \}}
