@@ -6,6 +6,9 @@ on:
 
 jobs:
   build:
+    permissions:
+      contents: read
+      security-events: write
     uses: Vaultrix-in/Vaultrix-CI/.github/workflows/parent-ci.yaml@main
     with:
       image_name: invoice-service
