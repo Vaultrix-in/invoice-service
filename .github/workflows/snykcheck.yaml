@@ -14,7 +14,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: Vaultrix-in/Vaultrix-CI/.github/workflows/snykcheck.yaml@feat/ci-workflows
+    uses: Vaultrix-in/Vaultrix-CI/.github/workflows/snykcheck.yaml@main
     with:
       image_name: invoice-service
     secrets:
