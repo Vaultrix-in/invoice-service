@@ -1,0 +1,75 @@
+name: Reusable Snyk Check
+
+on:
+  workflow_call:
+    outputs:
+      snyk_status:
+        description: Snyk outcome
+        value: ${{ jobs.snyk-scan.outputs.snyk_status }}
+      notify_summary:
+        description: Notification summary
+        value: ${{ jobs.snyk-scan.outputs.notify_summary }}
+
+permissions:
+  contents: read
+
+jobs:
+  snyk-scan:
+    name: Snyk scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      snyk_status: ${{ steps.set_outputs.outputs.snyk_status }}
+      notify_summary: ${{ steps.set_outputs.outputs.notify_summary }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Run Snyk test for Node dependencies
+        id: snyk-check
+        uses: snyk/actions/node@master
+        with:
+          args: >-
+            --severity-threshold=high
+            --project-name=${{ github.event.repository.name }}
+            --target-reference=${{ github.ref_name }}
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@master
+
+      - name: Authenticate Snyk CLI
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk auth "$SNYK_TOKEN"
+
+      - name: Publish project snapshot to Snyk UI
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk monitor --project-name=${{ github.repository }}
+
+      - name: Set normalized outputs
+        id: set_outputs
+        run: |
+          echo "snyk_status=${{ steps.snyk-check.outcome }}" >> "$GITHUB_OUTPUT"
+          if [ "${{ steps.snyk-check.outcome }}" = "failure" ]; then
+            echo "notify_summary=Dependency vulnerabilities or policy issues were found in invoice-service." >> "$GITHUB_OUTPUT"
+          else
+            echo "notify_summary=No blocking Snyk issues were found in invoice-service." >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Stop pipeline - snyk scan failed
+        if: ${{ steps.snyk-check.outcome == 'failure' }}
+        run: exit 1
