@@ -1,0 +1,23 @@
+﻿name: ci-build
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    types: [closed]
+
+jobs:
+  ci-build:
+    if: github.event.pull_request.merged == true
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    uses: Vaultrix-in/Vaultrix-CI/.github/workflows/ci-build.yaml@feat/ci-workflows
+    with:
+      image_name: invoice-service
+    secrets:
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      NOTIFY_EMAIL_TO: ${{ secrets.NOTIFY_EMAIL_TO }}

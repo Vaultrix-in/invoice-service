@@ -1,21 +1,19 @@
-name: CI
+﻿name: snykcheck
 
 on:
-  push:
+  pull_request:
     branches: [ "main" ]
+    types: [opened, synchronize, reopened]
 
 jobs:
-  build:
+  snykcheck:
     permissions:
       contents: read
       security-events: write
-    uses: Vaultrix-in/Vaultrix-CI/.github/workflows/parent-ci.yaml@main
+    uses: Vaultrix-in/Vaultrix-CI/.github/workflows/snykcheck.yaml@feat/ci-workflows
     with:
       image_name: invoice-service
     secrets:
-      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
