@@ -17,11 +17,11 @@ on:
         type: string
       yaml_path:
         required: false
-        default: .image.tag
+        default: ".image.tag"
         type: string
       commit_message:
         required: false
-        default: ci: update image tag
+        default: "ci: update image tag"
         type: string
     secrets:
       PAT_TOKEN:
